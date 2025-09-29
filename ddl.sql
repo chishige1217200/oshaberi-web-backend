@@ -8,8 +8,9 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS character(
-        id INTEGER,
+        id INTEGER NOT NULL,
         language_id TEXT NOT NULL DEFAULT 'ja-JP',
+        name TEXT NOT NULL DEFAULT '名無し',
         prompt TEXT NOT NULL,
         model_name TEXT NOT NULL,
         tts_voice TEXT NOT NULL DEFAULT 'ja-JP-NanamiNeural-Female',
@@ -21,7 +22,7 @@ CREATE TABLE
 
 CREATE TABLE
     IF NOT EXISTS chat (
-        id INTEGER,
+        id INTEGER NOT NULL,
         character_id INTEGER NOT NULL,
         subject TEXT,
         upd_datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 'YYYY-MM-DD HH:MM:SS'形式で保存
