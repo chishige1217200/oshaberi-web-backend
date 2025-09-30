@@ -9,6 +9,10 @@ app = FastAPI()
 async def root():
     return {"message": "Hello World"}
 
+@app.get("/languages/")
+async def get_languages():
+    return db.get_languages()
+
 @app.get("/chats/")
 async def get_chats():
     return db.get_chats()
