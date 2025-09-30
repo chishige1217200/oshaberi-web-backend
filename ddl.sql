@@ -34,10 +34,12 @@ CREATE TABLE
     IF NOT EXISTS message (
         chat_id INTEGER NOT NULL,
         id INTEGER NOT NULL,
+        language_id TEXT NOT NULL,
         role TEXT NOT NULL,
         content TEXT NOT NULL,
         audio_path TEXT,
         upd_datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (chat_id, id),
-        FOREIGN KEY (chat_id) REFERENCES chat (id)
+        FOREIGN KEY (chat_id) REFERENCES chat (id),
+        FOREIGN KEY (language_id) REFERENCES character(language_id)
     );
