@@ -38,6 +38,11 @@ async def get_all_messages():
 async def get_messages(chat_id: int):
     return db.get_messages(chat_id)
 
+@app.post("/create-chat/")
+async def create_chat(data: dict):
+    # チャットを作成するための処理を実装
+    return {"received": data}
+
 @app.post("/chat/")
 async def post_chat(data: dict):
 
