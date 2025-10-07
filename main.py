@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 import db
+from model import CreateChatRequest
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -39,9 +40,8 @@ async def get_messages(chat_id: int):
     return db.get_messages(chat_id)
 
 @app.post("/create-chat/")
-async def create_chat(data: dict):
-    # チャットを作成するための処理を実装
-    return {"received": data}
+async def create_chat(data: CreateChatRequest):
+    return db.create_chat(data.character_id)
 
 @app.post("/chat/")
 async def post_chat(data: dict):

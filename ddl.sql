@@ -25,7 +25,7 @@ CREATE TABLE
     IF NOT EXISTS chat (
         id INTEGER NOT NULL,
         character_id INTEGER NOT NULL,
-        subject TEXT,
+        subject TEXT NOT NULL DEFAULT '新しいチャット',
         upd_datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 'YYYY-MM-DD HH:MM:SS'形式で保存
         PRIMARY KEY (id),
         FOREIGN KEY (character_id) REFERENCES character(id)

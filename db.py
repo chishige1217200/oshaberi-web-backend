@@ -70,5 +70,23 @@ def get_messages(chat_id):
         messages = cursor.fetchall()
         return messages
 
+def get_next_chat_id():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(id) as max_id FROM chat")
+        row = cursor.fetchone()
+        next_id = 1 if row['max_id'] is None else row['max_id'] + 1
+        return next_id
+
+def create_chat(character_id):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO chat (id, character_id) VALUES (?, ?)", (get_next_chat_id(), character_id))
+        conn.commit()
+
+        cursor.execute("SELECT id, character_id, subject, upd_datetime FROM chat WHERE id = ?", (cursor.lastrowid,))
+        chat = cursor.fetchone()
+        return chat
+
 # テーブルを作成する
 create_table()
