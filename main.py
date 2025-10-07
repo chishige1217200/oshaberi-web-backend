@@ -22,6 +22,10 @@ async def root():
 async def get_languages():
     return db.get_languages()
 
+@app.get("/characters/")
+async def get_characters():
+    return db.get_characters()
+
 @app.get("/chats/")
 async def get_chats():
     return db.get_chats()

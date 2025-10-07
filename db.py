@@ -42,6 +42,13 @@ def get_languages():
         languages = cursor.fetchall()
         return languages
 
+def get_characters():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, language_id, name, prompt, model_name, icon_path, tts_voice, f0_key_up, upd_datetime FROM character order by id, language_id")
+        characters = cursor.fetchall()
+        return characters
+
 def get_chats():
     with get_connection() as conn:
         cursor = conn.cursor()
