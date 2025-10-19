@@ -3,7 +3,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 import db
-from model import CreateChatRequest
+import llm
+from model import ChatRequest, CreateChatRequest, Message
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -15,38 +16,55 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
 
 @app.get("/languages/")
 async def get_languages():
     return db.get_languages()
 
+
 @app.get("/characters/")
 async def get_characters():
     return db.get_characters()
+
 
 @app.get("/chats/")
 async def get_chats():
     return db.get_chats()
 
+
 @app.get("/all-messages/")
 async def get_all_messages():
     return db.get_all_messages()
 
+
 @app.get("/messages/{chat_id}")
 async def get_messages(chat_id: int):
-    return db.get_messages(chat_id)
+    # システムメッセージを含まない
+    return db.get_messages(chat_id, 1)
+
 
 @app.post("/create-chat/")
 async def create_chat(data: CreateChatRequest):
     return db.create_chat(data.character_id)
 
-@app.post("/chat/")
-async def post_chat(data: dict):
 
-    return {"received": data}
+@app.post("/chat/")
+async def post_chat(data: ChatRequest):
+    # ユーザのメッセージをDBに保存
+    db.add_message(data.chat_id, 'user', data.content)
+
+    # AIモデルと対話して回答を取得
+    messages = [Message(**d) for d in db.get_messages(data.chat_id, 0)]
+    response = llm.chat_with_model(messages)
+
+    # AIの回答をDBに保存
+    # AIの回答を返す
+    return db.add_message(data.chat_id, 'assistant', response)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="debug")
