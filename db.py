@@ -89,6 +89,19 @@ def get_messages(chat_id: int, id: int = 0) -> list[dict]:
         return messages
 
 
+# 単一の会話履歴を取得する関数
+def get_message(chat_id: int, id: int) -> dict:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT chat_id, id, language_id, role, content, audio_path, upd_datetime FROM message WHERE chat_id = ? AND id = ?",
+                        (chat_id, id))
+        message = cursor.fetchone()
+        conn.commit()
+
+        return message
+
+
 # 新しいチャットIDを採番する処理
 def get_next_chat_id() -> int:
     with get_connection() as conn:
@@ -154,10 +167,8 @@ def add_message(chat_id: int, role: str, content: str) -> dict:
             cursor.execute("INSERT INTO message (chat_id, id, language_id, role, content) VALUES (?, ?, 'ja-JP', ?, ?)",
                            (chat_id, message_id, role, content))
 
-            cursor.execute("SELECT chat_id, id, language_id, role, content, audio_path, upd_datetime FROM message WHERE chat_id = ? AND id = ?",
-                           (chat_id, message_id))
-            message = cursor.fetchone()
             conn.commit()
+            message = get_message(chat_id, message_id)
 
             return message
         except ValueError:
