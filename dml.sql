@@ -13,7 +13,7 @@ REPLACE INTO
         model_name,
         icon_path,
         tts_voice,
-        f0_key_up
+        f0_up_key
     )
 VALUES
     (

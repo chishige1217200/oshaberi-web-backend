@@ -54,7 +54,7 @@ def get_characters() -> list[dict]:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id, language_id, name, prompt, model_name, icon_path, tts_voice, f0_key_up, upd_datetime FROM character ORDER BY id, language_id")
+            "SELECT id, language_id, name, prompt, model_name, icon_path, tts_voice, f0_up_key, upd_datetime FROM character ORDER BY id, language_id")
         characters = cursor.fetchall()
         return characters
 
