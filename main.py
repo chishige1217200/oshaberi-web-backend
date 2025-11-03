@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
+from model import ChatRequest, CreateChatRequest, Message, TtsApiRequest, TtsRequest
 import db
 import llm
-from model import ChatRequest, CreateChatRequest, Message
+import tts
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -65,6 +66,28 @@ async def post_chat(data: ChatRequest):
     # AIの回答をDBに保存
     # AIの回答を返す
     return db.add_message(data.chat_id, 'assistant', response)
+
+
+@app.post("/tts/")
+async def create_tts(data: TtsRequest):
+    chat = db.get_chat(data.chat_id)
+    message = db.get_message(data.chat_id, data.id)
+    character = db.get_character(chat['character_id'])
+
+    # 音声ファイルの受信と書き込み
+    request: TtsApiRequest = TtsApiRequest(
+        model_name=character['model_name'],
+        speed=0,
+        tts_text=message['content'],
+        tts_voice=character['tts_voice'],
+        f0_up_key=character['f0_up_key'],
+        f0_method='rmvpe',
+        index_rate=1,
+        protect=0.33
+    )
+    file_name = tts.create_audio(data.chat_id, data.id, request)
+    return db.update_audio_path(data.chat_id, data.id, file_name)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="debug")
