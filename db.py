@@ -54,9 +54,29 @@ def get_characters() -> list[dict]:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id, language_id, name, prompt, model_name, icon_path, tts_voice, f0_key_up, upd_datetime FROM character ORDER BY id, language_id")
+            "SELECT id, language_id, name, prompt, model_name, icon_path, tts_voice, f0_up_key, upd_datetime FROM character ORDER BY id, language_id")
         characters = cursor.fetchall()
         return characters
+
+
+# 単一のキャラクタを取得する関数
+def get_character(character_id: int) -> list[dict]:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, language_id, name, prompt, model_name, icon_path, tts_voice, f0_up_key, upd_datetime FROM character WHERE id = ? AND language_id = 'ja-JP'", (character_id,))
+        character = cursor.fetchone()
+        return character
+
+
+# 単一のチャットを取得する関数
+def get_chat(id: int) -> dict:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, character_id, subject, upd_datetime FROM chat WHERE id = ?", (id,))
+        chat = cursor.fetchone()
+        return chat
 
 
 # チャット一覧を取得する関数
@@ -87,6 +107,19 @@ def get_messages(chat_id: int, id: int = 0) -> list[dict]:
             "SELECT chat_id, id, language_id, role, content, audio_path, upd_datetime FROM message WHERE chat_id = ? AND id >= ? ORDER BY id", (chat_id, id))
         messages = cursor.fetchall()
         return messages
+
+
+# 単一の会話履歴を取得する関数
+def get_message(chat_id: int, id: int) -> dict:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT chat_id, id, language_id, role, content, audio_path, upd_datetime FROM message WHERE chat_id = ? AND id = ?", (chat_id, id))
+        message = cursor.fetchone()
+        conn.commit()
+
+        return message
 
 
 # 新しいチャットIDを採番する処理
@@ -154,10 +187,26 @@ def add_message(chat_id: int, role: str, content: str) -> dict:
             cursor.execute("INSERT INTO message (chat_id, id, language_id, role, content) VALUES (?, ?, 'ja-JP', ?, ?)",
                            (chat_id, message_id, role, content))
 
-            cursor.execute("SELECT chat_id, id, language_id, role, content, audio_path, upd_datetime FROM message WHERE chat_id = ? AND id = ?",
-                           (chat_id, message_id))
-            message = cursor.fetchone()
             conn.commit()
+            message = get_message(chat_id, message_id)
+
+            return message
+        except ValueError:
+            conn.rollback()
+            raise
+
+
+# TTS音声ファイルのパスを設定する処理
+def update_audio_path(chat_id: int, id: int, audio_path: str):
+    with get_connection() as conn:
+        try:
+            cursor = conn.cursor()
+            conn.execute("BEGIN TRANSACTION;")
+            cursor.execute("UPDATE message SET audio_path = ? WHERE chat_id = ? AND id = ?",
+                           (audio_path, chat_id, id))
+
+            conn.commit()
+            message = get_message(chat_id, id)
 
             return message
         except ValueError:

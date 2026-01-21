@@ -15,7 +15,7 @@ CREATE TABLE
         model_name TEXT NOT NULL,
         icon_path TEXT NOT NULL DEFAULT 'sample.png',
         tts_voice TEXT NOT NULL DEFAULT 'ja-JP-NanamiNeural-Female',
-        f0_key_up INTEGER NOT NULL DEFAULT 0,
+        f0_up_key INTEGER NOT NULL DEFAULT 0,
         upd_datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 'YYYY-MM-DD HH:MM:SS'形式で保存
         PRIMARY KEY (id, language_id),
         FOREIGN KEY (language_id) REFERENCES language (id)

@@ -26,3 +26,19 @@ class ChatRequest(BaseModel):
 class OllamaMessageRequest(BaseModel):
     role: str
     content: str
+
+
+class TtsRequest(BaseModel):
+    chat_id: int
+    id: int
+
+
+class TtsApiRequest(BaseModel):
+    model_name: str
+    speed: int
+    tts_text: str
+    tts_voice: str
+    f0_up_key: int
+    f0_method: str
+    index_rate: int
+    protect: float
