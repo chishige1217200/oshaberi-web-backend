@@ -24,7 +24,7 @@ def get_connection():
 
 
 # データベースの初期化を行う関数
-def create_table():
+def create_table(initialize_master: bool = False):
     with get_connection() as conn:
         with open('ddl.sql', 'r', encoding='utf-8') as f:
             ddl = f.read()
@@ -32,11 +32,12 @@ def create_table():
             conn.executescript(ddl)
             conn.commit()
 
-        with open('dml.sql', 'r', encoding='utf-8') as f:
-            dml = f.read()
-            # print(dml)
-            conn.executescript(dml)
-            conn.commit()
+        if initialize_master:
+            with open('dml.sql', 'r', encoding='utf-8') as f:
+                dml = f.read()
+                # print(dml)
+                conn.executescript(dml)
+                conn.commit()
 
 
 # 言語一覧を取得する関数
@@ -225,5 +226,6 @@ def get_next_message_id(chat_id: int) -> int:
         return next_id
 
 
-# テーブルを作成する
-create_table()
+# データベースを初期化する
+# マスタ初期化の場合は引数にTrueを渡す
+create_table(False)
