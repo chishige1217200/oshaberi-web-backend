@@ -8,9 +8,25 @@ from model import TtsApiRequest
 # .envファイルの内容を読み込見込む
 load_dotenv()
 
+# 置換規則を辞書で定義
+REPLACE_MAP = {
+    "#": "シャープ",
+    "＃": "シャープ",
+    "♯": "シャープ",
+    "%": "パーセント",
+    "％": "パーセント",
+}
 
-# ttsサーバに通信して音声ファイルを作成して保存する関数
+
+def replace_special_chars(text: str) -> str:
+    """REPLACE_MAP に従って文字列を置換する"""
+    for old, new in REPLACE_MAP.items():
+        text = text.replace(old, new)
+    return text
+
+
 def create_audio(chat_id: int, id: int, request: TtsApiRequest):
+    """ttsサーバに通信して音声ファイルを作成して保存する"""
     mode = os.environ['MODE']
     dt_now = datetime.datetime.now()
 
@@ -34,8 +50,11 @@ def create_audio(chat_id: int, id: int, request: TtsApiRequest):
     elif mode == 'VITS2':
         print("Style-Bert-VITS2で音声合成を行います")
 
+        # 正常に音声合成できない問題を回避するため、文字列を置換する
+        text = replace_special_chars(request.tts_text)
+
         json_data = {}
-        url = f"http://{os.environ['TTS_IPADRESS']}:{os.environ['TTS_PORT']}/voice?text={request.tts_text}&encoding=UTF-8&model_name={request.model_name}&language=JP"
+        url = f"http://{os.environ['TTS_IPADRESS']}:{os.environ['TTS_PORT']}/voice?text={text}&encoding=UTF-8&model_name={request.model_name}&language=JP"
         headers = {}
 
     with requests.post(url, headers=headers, data=json_data, stream=True) as response:
